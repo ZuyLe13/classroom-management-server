@@ -1,13 +1,8 @@
-import config from '../configs/config.js';
-import { sendSMS } from '../services/twiloService.js';
 import { clearAccessCode, getAccessCode, storeAccessCode } from '../services/firebaseService.js';
 
 export const createAccessCode = async (req, res) => {
   try {
-    const { phone } = req.body;
-    const accessCode = Math.floor(100000 + Math.random() * 900000).toString();
-    await storeAccessCode(phone, accessCode);
-    const messageInfo = await sendSMS(config.to, `Your access code is: ${accessCode}`);
+    const messageInfo = await storeAccessCode(req.body);
     res.status(200).json({ message: "Access code sent successfully", messageInfo });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -16,14 +11,20 @@ export const createAccessCode = async (req, res) => {
 
 export const validateAccessCode = async (req, res) => {
   try {
-    const { phone, accessCode } = req.body;
-    const storedAccessCode = await getAccessCode(phone);
-    if (storedAccessCode !== accessCode) {
-      res.status(401).json({ error: "Invalid access code" });
-    }
-    await clearAccessCode(phone);
+    const { phone, email } = req.body;
+    await getAccessCode(req.body);
+    await clearAccessCode(phone || email);
     res.status(200).json({ message: "Access code validated successfully" });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 }
+
+export const loginEmail = async (req, res) => {
+  try {
+    const messageInfo = await storeAccessCode(req.body);
+    res.status(200).json({ message: "Access code sent successfully", messageInfo });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
