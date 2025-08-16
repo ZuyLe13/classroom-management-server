@@ -19,3 +19,12 @@ export const sendAccessCodeToEmail = async (to, accessCode) => {
     html: `<p>Your access code is: <strong>${accessCode}</strong></p>`
   });
 }
+
+export const sendLinkToEmail = async (to, link) => {
+  return await transporter.sendMail({
+    from: 'no-reply@example.com',
+    to,
+    subject: 'Your Access Link',
+    html: `<p>Your access link to set up your account is: <a href="${link}">${link}</a></p>`
+  });
+}
