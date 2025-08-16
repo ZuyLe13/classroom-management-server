@@ -14,7 +14,13 @@ const {
   ACCOUNT_SID,
   AUTH_TOKEN,
   FROM,
-  TO
+  TO,
+  SMTP_HOST,
+  SMTP_PORT,
+  SMTP_USER,
+  SMTP_PASS,
+  JWT_SECRET,
+  FRONTEND_URL
 } = process.env;
 
 export default {
@@ -31,5 +37,13 @@ export default {
   accountSid: ACCOUNT_SID,
   authToken: AUTH_TOKEN,
   from: FROM,
-  to: TO
+  to: TO,
+  jwtSecret: JWT_SECRET,
+  frontendUrl: FRONTEND_URL,
+  smtpConfig: {
+    host: SMTP_HOST,
+    port: SMTP_PORT,
+    user: SMTP_USER,
+    pass: SMTP_PASS
+  }
 };
