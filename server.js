@@ -4,6 +4,7 @@ import bodyParser from 'body-parser';
 import config from './configs/config.js';
 import { firebase } from './configs/firebase.js';
 import authRoutes from './routes/authRoute.js';
+import instructorRoutes from './routes/instructorRoute.js';
 import { errorHandler } from './middlewares/errorHandler.js';
 
 const app = express();
@@ -14,6 +15,9 @@ app.use(bodyParser.urlencoded({ extended: false }));
 
 // Authentication Routes
 app.use("/api/v1/auth", authRoutes);
+
+// Instructor Routes
+app.use("/api/v1", instructorRoutes);
 
 // Global error handler
 app.use(errorHandler);

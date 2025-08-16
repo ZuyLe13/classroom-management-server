@@ -17,7 +17,6 @@ export const storeAccessCode = async (reqBody) => {
     
     return messageInfo;
   } catch (error) {
-    console.error("Error storing access code:", error);
     throw new Error("Failed to store access code");
   }
 }
@@ -31,7 +30,6 @@ export const getAccessCode = async (reqBody) => {
       throw new Error("Access code not found");
     }
   } catch (error) {
-    console.error("Error retrieving access code:", error);
     throw new Error("Failed to retrieve access code");
   }
 }
@@ -40,7 +38,6 @@ export const clearAccessCode = async (phone) => {
   try {
     await updateDoc(doc(db, "accessCodes", phone), { accessCode: "" });
   } catch (error) {
-    console.error("Error clearing access code:", error);
     throw new Error("Failed to clear access code");
   }
 }
