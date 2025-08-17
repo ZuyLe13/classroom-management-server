@@ -1,4 +1,4 @@
-import { collection, doc, getDoc, getDocs, query, setDoc, where } from "firebase/firestore";
+import { collection, deleteDoc, doc, getDoc, getDocs, query, setDoc, where } from "firebase/firestore";
 import { db } from "../configs/firebase.js";
 import { sendLinkToEmail } from "../configs/nodemailer.js";
 import config from "../configs/config.js";
@@ -48,11 +48,20 @@ export const getAllDetails = async () => {
 
 export const updateDetails = async (phone, reqBody) => {
   try {
-    await setDoc(doc(db, "students", phone), reqBody);
+    const updatedStudent = await setDoc(doc(db, "students", phone), reqBody);
+    return updatedStudent;
   } catch (error) {
     throw new Error("Failed to update student details");
   }
 }
+
+export const deleteStudentByPhone = async (phone) => {
+  try {
+    await deleteDoc(doc(db, "students", phone));
+  } catch (error) {
+    throw new Error("Failed to delete student");
+  }
+};
 
 export const verifyToken = async (reqQuery) => {
   try {
@@ -60,6 +69,9 @@ export const verifyToken = async (reqQuery) => {
     const student = await getDetailsByPhone(decoded.phone);
     return student;
   } catch (error) {
+    if (error.name === "TokenExpiredError") {
+      throw new Error("Token has expired"); 
+    }
     throw new Error("Failed to verify setup token"); 
   }
 }
