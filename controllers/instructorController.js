@@ -1,6 +1,4 @@
-import jwt from "jsonwebtoken";
-import { createAccount, createNew, deleteUserByPhone, getAllDetails, signIn, updateDetails, verifyToken } from "../services/instructorService.js";
-import config from "../configs/config.js";
+import { assignLessonToStudent, createAccount, createNew, createNewLesson, deleteUserByPhone, getAllDetails, getLessons, signIn, updateDetails, verifyToken } from "../services/instructorService.js";
 
 export const addStudent = async (req, res) => {
   try {
@@ -60,6 +58,37 @@ export const deleteStudent = async (req, res) => {
   try {
     await deleteUserByPhone(req.params.phone);
     res.status(200).json({ message: "Student deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+}
+
+export const createLesson = async (req, res) => {
+  try {
+    const newLesson = await createNewLesson({
+      ...req.body,
+      assignedTos: [],
+      completed: []
+    });
+    res.status(201).json({ message: "Lesson created successfully", lesson: newLesson });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+}
+
+export const getAllLessons = async (req, res) => {
+  try {
+    const lessons = await getLessons();
+    res.status(200).json({ message: "Lessons fetched successfully", lessons });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+}
+
+export const assignLesson = async (req, res) => {
+  try {
+    const updatedLesson = await assignLessonToStudent(req.body);
+    res.status(200).json({ message: "Lesson assigned successfully", lesson: updatedLesson });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

@@ -1,15 +1,21 @@
 import { Router } from "express";
 import { validateBody } from "../middlewares/validateBody.js";
 import { studentValidation } from "../validations/studentValidation.js";
-import { addStudent, deleteStudent, getAllStudents, setupAccount, signInStudent, updateStudent, verifySetupToken } from "../controllers/instructorController.js";
+import { addStudent, assignLesson, createLesson, deleteStudent, getAllLessons, getAllStudents, setupAccount, signInStudent, updateStudent, verifySetupToken } from "../controllers/instructorController.js";
+import { lessonValidation } from "../validations/lessonValidation.js";
 
 const router = Router();
   
-router.post("/addStudent", validateBody(studentValidation), addStudent);
 router.get("/verifySetupToken", verifySetupToken);
+router.get("/students", getAllStudents);
+router.get("/lessons", getAllLessons);
+
+router.post("/addStudent", validateBody(studentValidation), addStudent);
 router.post("/setupAccount", setupAccount);
 router.post("/signIn", signInStudent);
-router.get("/students", getAllStudents);
+router.post("/createLesson", validateBody(lessonValidation), createLesson);
+router.post("/assignLesson", assignLesson);
+
 router.put("/editStudent/:phone", updateStudent);
 router.delete("/student/:phone", deleteStudent);
 
