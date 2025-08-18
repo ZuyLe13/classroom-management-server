@@ -122,3 +122,46 @@ export const signIn = async (reqBody) => {
     throw new Error("Failed to sign in");
   }
 }
+
+export const createNewLesson = async (reqBody) => {
+  try {
+    const newLesson = await setDoc(doc(db, "lessons", reqBody.id), reqBody);
+    return newLesson;
+  } catch (error) {
+    throw new Error("Failed to create lesson");
+  }
+}
+
+export const getLessons = async () => {
+  try {
+    const lessonsCollection = await getDocs(collection(db, "lessons"));
+    const lessons = lessonsCollection.docs.map(doc => doc.data());
+    return lessons;
+  } catch (error) {
+    throw new Error("Failed to retrieve lessons");
+  }
+}
+
+export const assignLessonToStudent = async (reqBody) => {
+  try {
+    const lessonDoc = await getDoc(doc(db, "lessons", reqBody.lessonId));
+    
+    if (!lessonDoc.exists()) {
+      throw new Error("Lesson not found");
+    }
+
+    const lessonData = lessonDoc.data();
+    const assignedTos = lessonData.assignedTos || [];
+
+    if (assignedTos.includes(reqBody.studentPhone)) {
+      console.log(`Lesson ${reqBody.lessonId} is already assigned to student ${reqBody.studentPhone}`);
+      throw new Error("Lesson already assigned to this student");
+    }
+
+    assignedTos.push(reqBody.studentPhone);
+    const updatedLesson = await setDoc(doc(db, "lessons", reqBody.lessonId), { assignedTos }, { merge: true });
+    return updatedLesson;
+  } catch (error) {
+    throw new Error("Failed to assign lesson to student");
+  }
+}
