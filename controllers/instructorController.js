@@ -1,4 +1,6 @@
-import { createAccount, createNew, deleteStudentByPhone, getAllDetails, signIn, updateDetails, verifyToken } from "../services/instructorService.js";
+import jwt from "jsonwebtoken";
+import { createAccount, createNew, deleteUserByPhone, getAllDetails, signIn, updateDetails, verifyToken } from "../services/instructorService.js";
+import config from "../configs/config.js";
 
 export const addStudent = async (req, res) => {
   try {
@@ -30,7 +32,7 @@ export const setupAccount = async (req, res) => {
 export const signInStudent = async (req, res) => {
   try {
     const students = await signIn(req.body);
-    res.status(200).json({ message: "Sign in successful", students });
+    res.status(200).json(students);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -56,7 +58,7 @@ export const updateStudent = async (req, res) => {
 
 export const deleteStudent = async (req, res) => {
   try {
-    await deleteStudentByPhone(req.params.phone);
+    await deleteUserByPhone(req.params.phone);
     res.status(200).json({ message: "Student deleted successfully" });
   } catch (error) {
     res.status(500).json({ error: error.message });

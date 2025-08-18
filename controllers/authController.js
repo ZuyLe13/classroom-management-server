@@ -1,4 +1,6 @@
+import config from '../configs/config.js';
 import { clearAccessCode, getAccessCode, storeAccessCode } from '../services/firebaseService.js';
+import jwt from 'jsonwebtoken';
 
 export const createAccessCode = async (req, res) => {
   try {
