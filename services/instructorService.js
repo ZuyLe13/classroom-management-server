@@ -8,66 +8,66 @@ import bcrypt from "bcrypt";
 export const createNew = async (reqBody) => {
   try {
     const value = {...reqBody};
-    const storedStudent = await getDoc(doc(db, "students", reqBody.phone));
-    if (storedStudent.exists()) {
-      throw new Error("Student with this phone number already exists");
+    const storedUser = await getDoc(doc(db, "users", reqBody.phone));
+    if (storedUser.exists()) {
+      throw new Error("User with this phone number already exists");
     }
-    const newStudent = await setDoc(doc(db, "students", reqBody.phone), value);
+    const newUser = await setDoc(doc(db, "users", reqBody.phone), value);
     const token = jwt.sign({ phone: reqBody.phone }, config.jwtSecret, { expiresIn: '1h' });
-    const link = `${config.frontendUrl}/setup-account?token=${token}`;
+    const link = `${config.frontendUrl}/sign-in?token=${token}`;
 
     await sendLinkToEmail(reqBody.email, link);
-    return newStudent;
+    return newUser;
   } catch (error) {
-    throw new Error("Failed to create new student");
+    throw new Error("Failed to create new user");
   }
 }
 
 export const getDetailsByPhone = async (phone) => {
   try {
-    const storedStudent = await getDoc(doc(db, "students", phone));
-    if (storedStudent.exists()) {
-      return storedStudent.data();
+    const storedUser = await getDoc(doc(db, "users", phone));
+    if (storedUser.exists()) {
+      return storedUser.data();
     } else {
-      throw new Error("Student not found");
+      throw new Error("User not found");
     }
   } catch (error) {
-    throw new Error("Failed to retrieve student by phone");
+    throw new Error("Failed to retrieve user by phone");
   }
 }
 
 export const getAllDetails = async () => {
   try {
-    const studentsCollection = await getDocs(collection(db, "students"));
-    const students = studentsCollection.docs.map(doc => doc.data());
-    return students;
+    const usersCollection = await getDocs(collection(db, "users"));
+    const users = usersCollection.docs.map(doc => doc.data());
+    return users;
   } catch (error) {
-    throw new Error("Failed to retrieve all students");
+    throw new Error("Failed to retrieve all users");
   }
 }
 
 export const updateDetails = async (phone, reqBody) => {
   try {
-    const updatedStudent = await setDoc(doc(db, "students", phone), reqBody);
-    return updatedStudent;
+    const updatedUser = await setDoc(doc(db, "users", phone), reqBody);
+    return updatedUser;
   } catch (error) {
-    throw new Error("Failed to update student details");
+    throw new Error("Failed to update user details");
   }
 }
 
-export const deleteStudentByPhone = async (phone) => {
+export const deleteUserByPhone = async (phone) => {
   try {
-    await deleteDoc(doc(db, "students", phone));
+    await deleteDoc(doc(db, "users", phone));
   } catch (error) {
-    throw new Error("Failed to delete student");
+    throw new Error("Failed to delete user");
   }
 };
 
 export const verifyToken = async (reqQuery) => {
   try {
     const decoded = jwt.verify(reqQuery.token, config.jwtSecret);
-    const student = await getDetailsByPhone(decoded.phone);
-    return student;
+    const user = await getDetailsByPhone(decoded.phone);
+    return user;
   } catch (error) {
     if (error.name === "TokenExpiredError") {
       throw new Error("Token has expired"); 
@@ -81,13 +81,16 @@ export const createAccount = async (reqBody) => {
     const decoded = jwt.verify(reqBody.token, config.jwtSecret);
     const hashPassword = await bcrypt.hash(reqBody.password, 10);
 
-    const newAccount = await setDoc(doc(db, "students", decoded.phone),
+    const token = jwt.sign({ phone: reqBody.phone }, config.jwtSecret, { expiresIn: '1h' });
+    
+    const newAccount = await setDoc(doc(db, "users", decoded.phone),
     {
       ...reqBody,
+      token,
       password: hashPassword,
       isVerified: true
     }, { merge: true });
-    return newAccount;
+    return { token };
   } catch (error) {
     throw new Error("Failed to create account");
   }
@@ -95,22 +98,26 @@ export const createAccount = async (reqBody) => {
 
 export const signIn = async (reqBody) => {
   try {
-    const studentsRef = collection(db, 'students');
-    const q = query(studentsRef, where('username', '==', reqBody.username));
-    const querySnapshot = await getDocs(q);
-
-    const storedStudent = querySnapshot.docs[0];
-    const studentData = storedStudent.data();
+    const usersCollection = collection(db, 'users');
+    const querySnapshot = await getDocs(
+      query(usersCollection, where('username', '==', reqBody.username))
+    );
 
     if (querySnapshot.empty) {
-      throw new Error('Student not found');
+      throw new Error('User not found');
     }
-    const isValidPassword = await bcrypt.compare(reqBody.password, studentData.password);
+
+    const storedUser = querySnapshot.docs[0];
+    const userData = storedUser.data();
+
+    const isValidPassword = await bcrypt.compare(reqBody.password, userData.password);
     if (!isValidPassword) {
       throw new Error("Invalid password");
     }
-    const token = jwt.sign({ phone: reqBody.phone }, config.jwtSecret, { expiresIn: '1h' });
-    return { token }; 
+
+    const token = jwt.sign({ phone: userData.phone }, config.jwtSecret, { expiresIn: '1h' });
+
+    return { userData, token };
   } catch (error) {
     throw new Error("Failed to sign in");
   }
