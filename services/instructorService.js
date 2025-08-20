@@ -48,7 +48,7 @@ export const getAllDetails = async () => {
 
 export const updateDetails = async (phone, reqBody) => {
   try {
-    const updatedUser = await setDoc(doc(db, "users", phone), reqBody);
+    const updatedUser = await setDoc(doc(db, "users", phone), reqBody, { merge: true });
     return updatedUser;
   } catch (error) {
     throw new Error("Failed to update user details");
@@ -80,9 +80,7 @@ export const createAccount = async (reqBody) => {
   try {
     const decoded = jwt.verify(reqBody.token, config.jwtSecret);
     const hashPassword = await bcrypt.hash(reqBody.password, 10);
-
     const token = jwt.sign({ phone: reqBody.phone }, config.jwtSecret, { expiresIn: '1h' });
-    
     const newAccount = await setDoc(doc(db, "users", decoded.phone),
     {
       ...reqBody,
@@ -90,7 +88,7 @@ export const createAccount = async (reqBody) => {
       password: hashPassword,
       isVerified: true
     }, { merge: true });
-    return { token };
+    return { token, newAccount };
   } catch (error) {
     throw new Error("Failed to create account");
   }
@@ -163,5 +161,14 @@ export const assignLessonToStudent = async (reqBody) => {
     return updatedLesson;
   } catch (error) {
     throw new Error("Failed to assign lesson to student");
+  }
+}
+
+export const updateLessonDetail = async (lessonId, reqBody) => {
+  try {
+    const updatedLesson = await setDoc(doc(db, "lessons", lessonId), reqBody, { merge: true });
+    return updatedLesson;
+  } catch (error) {
+    throw new Error("Failed to update lesson");
   }
 }

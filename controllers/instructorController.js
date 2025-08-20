@@ -1,4 +1,4 @@
-import { assignLessonToStudent, createAccount, createNew, createNewLesson, deleteUserByPhone, getAllDetails, getLessons, signIn, updateDetails, verifyToken } from "../services/instructorService.js";
+import { assignLessonToStudent, createAccount, createNew, createNewLesson, deleteUserByPhone, getAllDetails, getLessons, signIn, updateDetails, updateLessonDetail, verifyToken } from "../services/instructorService.js";
 
 export const addStudent = async (req, res) => {
   try {
@@ -89,6 +89,15 @@ export const assignLesson = async (req, res) => {
   try {
     const updatedLesson = await assignLessonToStudent(req.body);
     res.status(200).json({ message: "Lesson assigned successfully", lesson: updatedLesson });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+}
+
+export const updateLesson = async (req, res) => {
+  try {
+    const updatedLesson = await updateLessonDetail(req.params.id, req.body);
+    res.status(200).json({ message: "Lesson updated successfully", lesson: updatedLesson });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
